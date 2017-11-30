@@ -140,6 +140,19 @@ class Videa(MediaPost):
       return None
 
 
+class OkRu(MediaPost):
+
+  def __init__(self, video_id):
+    self.video_id = video_id
+    self.url = "https://ok.ru/video/" + self.video_id
+    self.soup = self.get_soup()
+
+
+  def get_embed(self):
+    result = '<iframe width="560" height="315" src="//ok.ru/videoembed/' + self.video_id + '" frameborder="0" allowfullscreen></iframe>'
+    return result
+
+
 class LastMinuteGoals(MediaPost):
 
   def __init__(self, video_id):
@@ -339,16 +352,17 @@ class Streamable(MediaPost):
   def __init__(self, video_id):
     self.video_id = video_id
     self.url = 'http://streamable.com/' + self.video_id
-    self.soup = self.get_soup()
+    #self.soup = self.get_soup()
 
   def get_embed(self):
-    result = self.soup.find(id="embed")
+    #result = self.soup.find(id="embed")
     #return result['value']  + "<center><a href='" + self.url + "'>Direct Link</a></center>"
     return '<iframe src="https://streamable.com/e/' + self.video_id + '" width="640" height="360" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen="" scrolling="no" style=""></iframe>'
 
   def get_thumb(self):
 
-    result = MediaPost.get_thumb(self)
+    #result = MediaPost.get_thumb(self)
+    return "https://cf-e2.streamablevideo.com/image/" + self.video_id + ".jpg?token=1507998947-Cp0%2BPmXhylnwEqee%2Fm2h9XLCvD3LJuqXtw8cdl9aA%2Bk%3D"
     return result
 
 
