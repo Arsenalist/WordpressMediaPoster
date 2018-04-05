@@ -357,7 +357,7 @@ class Streamable(MediaPost):
   def get_embed(self):
     #result = self.soup.find(id="embed")
     #return result['value']  + "<center><a href='" + self.url + "'>Direct Link</a></center>"
-    return '<iframe src="https://streamable.com/e/' + self.video_id + '" width="640" height="360" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen="" scrolling="no" style=""></iframe>'
+    return '<iframe src="https://streamable.com/e/' + self.video_id + '" width="640" height="360" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen="" scrolling="no" style=""></iframe> <p><a href="' + self.url + '">Direct Link</a></p>'
 
   def get_thumb(self):
 
