@@ -95,7 +95,7 @@ class MediaPostFactory:
         print u.hostname
         if u.hostname == 'www.youtube.com' or u.hostname == 'm.youtube.com':
             return media_sources.YouTube(params['v'][0])
-        elif u.hostname == 'ok.ru':
+        elif u.hostname == 'ok.ru' or u.hostname == 'www.ok.ru':
             return media_sources.OkRu(u.path.split('/')[2])
         elif u.hostname == 'youtu.be':
             return media_sources.YouTube(u.path.split('/')[1])
