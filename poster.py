@@ -5,7 +5,7 @@ from wordpress_xmlrpc.methods import taxonomies
 
 import datetime
 import argparse
-from urlparse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 import media_sources
 
 
@@ -92,7 +92,7 @@ class MediaPostFactory:
            
         u = urlparse(url)
         params = parse_qs(u.query)
-        print u.hostname
+        print (u.hostname)
         if u.hostname == 'www.youtube.com' or u.hostname == 'm.youtube.com':
             return media_sources.YouTube(params['v'][0])
         elif u.hostname == 'ok.ru' or u.hostname == 'www.ok.ru':
@@ -116,6 +116,8 @@ class MediaPostFactory:
             return media_sources.DailyMotion(u.path.split("/")[2])
         elif u.hostname == 'gfycat.com' or u.hostname == 'www.gfycat.com':
             return media_sources.Gfy(u.path.split("/")[1])
+        elif u.hostname == 'streamja.com' or u.hostname == 'www.streamja.com':
+            return media_sources.Streamja(u.path.split("/")[1])
         elif u.hostname == 'streamable.com' or u.hostname == 'www.streamable.com':
             return media_sources.Streamable(u.path.split("/")[1])
         elif u.hostname == 'vine.co':

@@ -2,10 +2,8 @@ import subprocess
 import re
 import requests
 from bs4 import BeautifulSoup
-import HTMLParser
-from urlparse import urlparse
-
-from urlparse import urlparse, parse_qs
+from html.parser import HTMLParser
+from urllib.parse import urlparse, parse_qs
 class MediaPost:
   def get_meta_value(self, prop):
     meta = self.soup.find('meta', property=prop)
@@ -366,6 +364,18 @@ class Streamable(MediaPost):
     return result
 
 
+class Streamja(MediaPost):
+  def __init__(self, video_id):
+    self.video_id = video_id
+    self.url = 'https://streamja.com/' + self.video_id
+    self.soup = self.get_soup()
+
+  def get_embed(self):
+    return '<iframe src="https://streamja.com/embed/'+ self.video_id + '" frameborder="0" width="640" height="360" allowfullscreen></iframe>' + '<p><a href="' + self.url + '">Direct Link</a></p>'
+
+  def get_thumb(self):
+    attrs = self.soup.select('#video_container video[poster]')
+    return attrs[0]['poster']
 
 
 
@@ -373,7 +383,6 @@ class YouTube(MediaPost):
   def __init__(self, video_id):
     self.video_id = video_id
     self.url = 'http://youtube.com/watch?v=' + self.video_id
-    self.soup = self.get_soup()
 
   def get_thumb(self):
     return "http://img.youtube.com/vi/" + self.video_id + "/mqdefault.jpg"
