@@ -1,6 +1,7 @@
 import subprocess
 import re
 import requests
+import pyimgur 
 from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 from urllib.parse import urlparse, parse_qs
@@ -11,7 +12,9 @@ class MediaPost:
         return meta['content']
     else:
         return ''
-
+  def get_permalink(self):
+    return None
+ 
   def get_thumb(self):
     return self.get_meta_value('og:image')
 
@@ -21,7 +24,7 @@ class MediaPost:
   def get_soup(self):
     r = requests.get(self.url, verify=False)
     self.text = r.text
-    return BeautifulSoup(r.text)
+    return BeautifulSoup(r.text, "html.parser")
 
   def get_json(self):
     r = requests.get(self.url, verify=False)
@@ -218,7 +221,23 @@ class Mp4(MediaPost):
     return "http://i.imgur.com/Ej1oWfr.jpg"
     
   def get_embed(self):
-    return '<link href="http://vjs.zencdn.net/5.11.6/video-js.css" rel="stylesheet"><script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script><video id="my-video" class="video-js" controls preload="auto" width="640" height="360" data-setup="{}"><source src="' + self.url + '"><p class="vjs-no-js">Please enable JavaScript</p></video><script src="http://vjs.zencdn.net/5.11.6/video.js"></script>'
+    return '<video id="myvideo" poster="' + self.get_thumb() + '" preload="auto" controls width="640" height="264"><source src="' + self.url + '" type="video/mp4" /></video><script>videojs("myvideo", {responsive: true});</script>'
+
+
+class Dubz(MediaPost):
+  def __init__(self, url):
+    self.url = "https://clip.dubz.co/v/" + url
+    self.soup = self.get_soup()
+
+  def get_thumb(self):
+    return "https://i.imgur.com/DcmtVt5.jpg"
+
+  def get_permalink(self):
+    return self.url
+    
+  def get_embed(self):    
+    direct_url = self.soup.select('video')[0].attrs['src']
+    return '<video id="myvideo" poster="' + self.get_thumb() + '" preload="auto" controls width="640" height="264"><source src="' + direct_url + '" type="video/mp4" /></video><script>videojs("myvideo", {responsive: true});</script>'
 
 
 
@@ -350,19 +369,22 @@ class Streamable(MediaPost):
   def __init__(self, video_id):
     self.video_id = video_id
     self.url = 'http://streamable.com/' + self.video_id
-    #self.soup = self.get_soup()
+    self.soup = self.get_soup()
+
+  def get_permalink(self):
+    return self.url
 
   def get_embed(self):
-    #result = self.soup.find(id="embed")
-    #return result['value']  + "<center><a href='" + self.url + "'>Direct Link</a></center>"
-    return '<iframe src="https://streamable.com/e/' + self.video_id + '" width="640" height="360" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen="" scrolling="no" style=""></iframe> <p><a href="' + self.url + '">Direct Link</a></p>'
-
+    return '<iframe src="https://streamable.com/e/' + self.video_id + '" width="640" height="360" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen="" scrolling="no" style=""></iframe>'
   def get_thumb(self):
-
-    #result = MediaPost.get_thumb(self)
-    return "https://cf-e2.streamablevideo.com/image/" + self.video_id + ".jpg?token=1507998947-Cp0%2BPmXhylnwEqee%2Fm2h9XLCvD3LJuqXtw8cdl9aA%2Bk%3D"
-    return result
-
+    result = MediaPost.get_thumb(self)
+    client_id = 'ce56ad30f145060'
+    client_secret = '105fb1f10346f4d69f4c46c508a5142f95c79b13'
+    im = pyimgur.Imgur(client_id)
+    # from imgurpython import ImgurClient
+    # client = ImgurClient(client_id, client_secret)
+    uploaded_image = im.upload_image(url=result, title="Uploaded with PyImgur")
+    return uploaded_image.link
 
 class Streamja(MediaPost):
   def __init__(self, video_id):
@@ -371,12 +393,22 @@ class Streamja(MediaPost):
     self.soup = self.get_soup()
 
   def get_embed(self):
-    return '<iframe src="https://streamja.com/embed/'+ self.video_id + '" frameborder="0" width="640" height="360" allowfullscreen></iframe>' + '<p><a href="' + self.url + '">Direct Link</a></p>'
+    return '<div><iframe src="https://streamja.com/embed/'+ self.video_id + '" frameborder="0" width="640" height="360" allowfullscreen></iframe></div>' + '<p><a href="' + self.url + '">Direct Link</a></p>'
 
   def get_thumb(self):
     attrs = self.soup.select('#video_container video[poster]')
     return attrs[0]['poster']
 
+class AssetsArsenalist(MediaPost):
+  def __init__(self, video_id):
+    self.video_id = video_id
+    self.url = 'https://assets.arsenalist.com/f/' + self.video_id
+
+  def get_embed(self):  	
+    return '<video id="myvideo" poster="' + self.get_thumb() + '" preload="auto" controls width="640" height="264"><source src="' + self.url + '" type="video/mp4" /></video><script>videojs("myvideo", {responsive: true});</script>'
+
+  def get_thumb(self):
+    return 'https://assets.arsenalist.com/f/' + self.video_id.replace(".mp4", ".png")
 
 
 class YouTube(MediaPost):
@@ -413,10 +445,10 @@ class Gfy(MediaPost):
     self.soup = self.get_soup()
 
   def get_thumb(self):
-    return 'http://thumbs.gfycat.com/' + self.gfy + '-thumb100.jpg'
+    return "https://i.imgur.com/DcmtVt5.jpg"
 
   def get_embed(self):
-    return '<img class="gfyitem" data-id="' + self.gfy + '" /><br/><center><a href="'+ self.url + '">Direct Link</a></center>'
+    return "<iframe src='https://gfycat.com/ifr/" + self.gfy + "?hd=1' frameborder='0' scrolling='no' allowfullscreen width='640' height='404'></iframe>"
 
   def get_type(self):
     return "GFY"

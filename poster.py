@@ -2,7 +2,6 @@ from wordpress_xmlrpc import Client, WordPressPost, WordPressTerm
 from wordpress_xmlrpc.methods.posts import GetPosts, EditPost
 from wordpress_xmlrpc.methods  import posts
 from wordpress_xmlrpc.methods import taxonomies
-
 import datetime
 import argparse
 from urllib.parse import urlparse, parse_qs
@@ -83,8 +82,8 @@ class MediaPostFactory:
     def create(url):
         if url.endswith('.webm'):
             return media_sources.Webm(url)
-        if url.endswith('.mp4'):
-            return media_sources.Mp4(url)
+        #if url.endswith('.mp4'):
+        #    return media_sources.Mp4(url)
         if url.endswith('.gif'):
             return media_sources.Gif(url)
         if url.endswith('.jpg') or url.endswith('.png'):
@@ -95,6 +94,10 @@ class MediaPostFactory:
         print (u.hostname)
         if u.hostname == 'www.youtube.com' or u.hostname == 'm.youtube.com':
             return media_sources.YouTube(params['v'][0])
+        elif u.hostname == 'assets.arsenalist.com':
+            return media_sources.AssetsArsenalist(u.path.split('/')[2])
+        elif u.hostname == 'clip.dubz.co' or  u.hostname == 'dubz.co':
+            return media_sources.Dubz(u.path.split('/')[2])                        
         elif u.hostname == 'ok.ru' or u.hostname == 'www.ok.ru':
             return media_sources.OkRu(u.path.split('/')[2])
         elif u.hostname == 'youtu.be':
@@ -140,6 +143,7 @@ def main():
     p.add_argument('-g', '--tags', nargs="*", default=[])
     p.add_argument("-m", '--matchcategory', help="Match category", required=False)
     p.add_argument("-u", '--source', help="Source", required=False)
+    p.add_argument("-p", '--path', help="Path to video file", required=False)
 
     p.add_argument('-d', '--description', required=True)
     p.add_argument("-s", '--sitecategory', help="Site category", required=True)
